@@ -1,0 +1,305 @@
+$#include "Defines.h"
+
+$#include "Core/Provider.hpp"
+
+$#include "GameScene.h"
+
+$#include "BGLayer.h"
+$#include "CreditsLayer.h"
+$#include "UI/GameModeLayer.h"
+$#include "UI/ModeMenuButton.hpp"
+$#include "GameLayer.h"
+$#include "GearLayer.h"
+$#include "GameOver.h"
+$#include "HudLayer.h"
+$#include "JoyStick.h"
+$#include "LoadLayer.h"
+$#include "PauseLayer.h"
+$#include "SelectLayer.h"
+$#include "StartMenu.h"
+
+$pfile "game/CharacterBase.pkg"
+
+/* ------- UI Layer ------- */
+
+/* GameScene.h */
+class GameScene : public CCScene {
+public:
+    static GameScene* create();
+	static const char *getPlatform();
+};
+
+/* StartMenu.h
+ * Created by C++. Touch handling, button actions and scene changes stay in C++;
+ * lua/ui/StartMenu.lua builds the decoration and lays out / animates the
+ * controls through the accessors below.
+ * NOTE: only methods are declared (see the HudLayer note below).
+ */
+class MenuButton : public CCSprite {
+public:
+	// MenuSlot value (Upper = 0, Top = 1, Lower = 2, Hidden = 3)
+	int getSlotIndex();
+
+	void playSound();
+};
+
+class StartMenu : public CCLayer {
+public:
+	static StartMenu* create();
+
+	void setCheats(int cheats);
+
+	int getMenuButtonCount();
+	MenuButton *getMenuButton(int index);
+	CCSprite *getMenuText();
+	CCMenuItem *getNewsButton();
+	CCMenuItem *getLoginButton();
+	CCNode *getNoticeBg();
+	CCNode *getNoticeClipper();
+	CCNode *getNoticeLabel();
+};
+
+/* CreditsLayer.h
+ * Fully Lua: lua/ui/CreditsLayer.lua builds the whole screen from
+ * CreditsLayer_Init(layer). C++ only owns the engine lifecycle (back key).
+ */
+class CreditsLayer : public CCLayer {
+public:
+};
+
+/* GameModeLayer.h / ModeMenuButton.hpp
+ * Created by C++ (StartMenu::onTrainingCallBack). Mode data, selection, touch
+ * handling, the return button and scene changes stay in C++;
+ * lua/ui/GameModeLayer.lua builds the decoration, places the controls through
+ * the getters below and draws the chain over locked buttons.
+ * NOTE: only methods are declared (see the HudLayer note below).
+ */
+class ModeMenuButton : public CCSprite {
+public:
+	void setLockMask(CCSprite *mask);
+};
+
+class GameModeLayer : public CCLayer {
+public:
+	int getModeButtonCount();
+	ModeMenuButton *getModeButton(int index);
+	CCLabelTTF *getModeLabel();
+	CCMenu *getReturnMenu();
+};
+
+/* GearLayer.h
+ * Created by C++ (GameLayer::onGear). Purchases, selection, touch handling and
+ * the scroll list stay in C++; lua/ui/GearLayer.lua lays out the C++-driven
+ * controls through the getters below, decorates the gear buttons and switches
+ * the detail card.
+ * NOTE: only methods are declared (see the HudLayer note below).
+ */
+class GearButton : public CCSprite {
+public:
+};
+
+class ScrewLayer : public CCLayer {
+public:
+	void setScrollLimits(float barMinY, float barMaxY, float listMinY);
+};
+
+class GearLayer : public CCLayer {
+public:
+	CCSprite *getSnapshotBg();
+	CCLabelBMFont *getCoinLabel();
+	CCSprite *getScrewBar();
+	CCSprite *getGearDetail();
+	// nil on mobile builds
+	CCSprite *getGearBigIcon();
+	CCMenu *getBuyMenu();
+	CCMenu *getCloseMenu();
+	CCNode *getClipper();
+	ScrewLayer *getScrewLayer();
+	CCLayer *getCurrentGearLayer();
+};
+
+/* PauseLayer.h
+ * Created by C++ (GameLayer::onPause). Audio, the sound / preload toggles,
+ * resuming and surrendering stay in C++; lua/ui/PauseLayer.lua builds the
+ * decoration, lays out the menus and builds the confirm dialog through the
+ * getters below.
+ * NOTE: only methods are declared (see the HudLayer note below).
+ */
+class PauseLayer : public CCLayer {
+public:
+	CCSprite *getSnapshotBg();
+	CCMenu *getPauseMenu();
+	CCMenu *getSoundMenu();
+	CCMenu *getPreMenu();
+	CCLayer *getExitLayer();
+	CCMenu *getConfirmMenu();
+	CCMenuItem *getResumeButton();
+	CCMenuItem *getBackButton();
+	CCMenuItem *getBgmButton();
+	CCMenuItem *getVoiceButton();
+	CCMenuItem *getPreloadButton();
+	CCMenuItem *getYesButton();
+	CCMenuItem *getNoButton();
+};
+
+/* GameOver.h
+ * Created by C++ (GameLayer game over flow). Score, reward and record
+ * calculation, anti-cheat checks and leaving the screen stay in C++;
+ * lua/ui/GameOver.lua draws the screen through the getters below.
+ * NOTE: only methods are declared (see the HudLayer note below).
+ */
+class GameOver : public CCLayer {
+public:
+	CCSprite *getSnapshotBg();
+	CCSprite *getResultBg();
+	CCMenu *getOverMenu();
+	CCLayer *getExitLayer();
+	CCMenu *getConfirmMenu();
+	CCMenuItem *getCloseButton();
+	CCMenuItem *getYesButton();
+	CCMenuItem *getNoButton();
+};
+
+/* LoadLayer.h */
+class LoadLayer : public CCLayer {
+public:
+	static LoadLayer* create();
+
+//	CCArray* tempHeros;
+//	int loadNum;
+
+	bool init();
+	GameLayer* getGameLayer();
+	void setGameLayer(GameLayer* var);
+	BGLayer* getBGLayer();
+	void setBGLayer(BGLayer* var);
+	HudLayer* getHudLayer();
+	void setHudLayer(HudLayer* var);
+
+	void preloadAudio();
+	void preloadIMG();
+	void playBGM(float dt);
+	void onLoadFinish(float dt);
+};
+
+/* ActionButton.h
+ * Core logic stays in C++; Lua only positions / scales / rotates it
+ * (everything it needs is inherited from CCSprite).
+ */
+class ActionButton : public CCSprite {
+};
+
+/* HudLayer.h
+ * Created by C++ (LoadLayer). Lua builds the HP/XP bars and hands them back
+ * with setStatusBars, and lays out the C++-driven controls through the getters.
+ * NOTE: only methods are declared. tolua++ member-variable getters for
+ * cocos objects emit a toluafix_pushusertype_ccobject call that does not
+ * compile, so expose members through accessor methods instead.
+ */
+class HudLayer : public CCLayer {
+public:
+	void setStatusBars(CCSprite *hpbar, CCSprite *hpMark, CCProgressTimer *expbar, CCLabelBMFont *hp, CCLabelBMFont *exp);
+
+	ActionButton *getNAttackButton();
+	ActionButton *getSkill1Button();
+	ActionButton *getSkill2Button();
+	ActionButton *getSkill3Button();
+	ActionButton *getSkill4Button();
+	ActionButton *getSkill5Button();
+	ActionButton *getItem1Button();
+	ActionButton *getItem2Button();
+	ActionButton *getItem3Button();
+	ActionButton *getItem4Button();
+
+	CCLayer *getMiniLayer();
+	CCSprite *getStatusBar();
+	CCMenu *getPauseMenu();
+	CCMenuItem *getPauseButton();
+	CCSprite *getKillIcon();
+	CCLabelBMFont *getKillLabel();
+	CCSprite *getDeadIcon();
+	CCLabelBMFont *getDeadLabel();
+	CCLabelBMFont *getKonoLabel();
+	CCLabelBMFont *getAkaLabel();
+	CCLabelBMFont *getColonLabel();
+	CCLabelBMFont *getCoinLabel();
+	CCLabelBMFont *getGameClock();
+	CCMenu *getGearMenu();
+	CCMenuItem *getGearMenuSprite();
+	ActionButton *getGear1Button();
+	ActionButton *getGear2Button();
+	ActionButton *getGear3Button();
+};
+
+/* SelectLayer.h */
+class SelectLayer : public CCLayer {
+public:
+	~SelectLayer();
+
+	static SelectLayer *create();
+
+	void setSelectHero(const char *var);
+	void setCom1Select(const char *var);
+	void setCom2Select(const char *var);
+	void setCom3Select(const char *var);
+
+	void setSelectList(CCArray *var);
+
+	void onGameStart();
+};
+
+/* KTools.h */
+class KTools {
+public:
+	static void initTableInDB();
+	static void initColumeInDB();
+
+	static sqlite3 *prepareTableInDB();
+
+	static bool saveToSQLite(const char *table = "GameRecord", const char *column = NULL, const char *value = NULL, bool isBuy = false);
+	static string readFromSQLite(const char *table = "GameRecord", const char *column = NULL, const char *value = NULL);
+
+	static void encode(string &str, int randomKey);
+	static void decode(string &str);
+
+	static string readSQLite(const char *table, const char *column, const char *value, const char *targetColumn);
+	static void saveSQLite(const char *table, const char *relatedColumn, const char *value, const char *targetColumn, const string &targetValue, bool isPlus);
+
+	static int readWinNumFromSQL(const char *heroName);
+	static int readCoinFromSQL();
+	static const char *readRecordTimeFromSQL(const char *heroName);
+
+	static string encodeData(string data);
+};
+
+/* CCTips.h */
+class CCTips : public CCSprite {
+public:
+	static CCTips *create(const char *tips);
+};
+
+/** CCClippingNode.h */
+class CCClippingNode : public CCNode
+{
+public:
+    static CCClippingNode* create();
+    static CCClippingNode* create(CCNode *pStencil);
+
+    bool init();
+    bool init(CCNode *pStencil);
+    void onEnter();
+    void onEnterTransitionDidFinish();
+    void onExitTransitionDidStart();
+
+    void onExit();
+    void visit();
+
+    CCNode* getStencil() const;
+    void setStencil(CCNode *pStencil);
+
+    GLfloat getAlphaThreshold() const;
+    void setAlphaThreshold(GLfloat fAlphaThreshold);
+
+    bool isInverted() const;
+    void setInverted(bool bInverted);
+};
