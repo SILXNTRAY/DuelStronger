@@ -10,7 +10,7 @@
   - [Know Issues](#know-issues)
   - [TODO](#todo)
   - [How to build?](#how-to-build)
-    - [Adnroid](#adnroid)
+    - [Android](#android)
     - [Linux](#linux)
     - [Windows](#windows)
   - [Structure](#structure)
@@ -66,8 +66,8 @@ Get the latest developments👇
   - Updated the project to cocos2d-x 2.2.6 & Visual Studio 2022 preview
   - Most dependent libraries have been upgraded to the latest version
   - Updated glfw2 to glfw3
-  - [Adnroid] Support android 12.0 and rounded icons
-  - [Adnroid] Support android arm64-v8a
+  - [Android] Support android 12.0 and rounded icons
+  - [Android] Support android arm64-v8a
   - [Linux] Use OpenAL instead of FMod
   - [Windows] Use OpenAL instead of native music player
   - [Assets] Use `ogg` format instead of `mp3` (Only support ogg)
