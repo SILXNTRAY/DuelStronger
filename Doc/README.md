@@ -297,7 +297,7 @@ root: projects/NarutoSenki
   - [Tiled](https://www.mapeditor.org/)
     - Can create maps (Get more rules open `xxx.tmx` in `projects/NarutoSenki/Resources/Tiles/` with tiled)
 
-## What is NarutoSenki: Re?
+## What is NarutoSenki: RE?
 
 > Made with Unity3D and still in development naruto video game.
 >
